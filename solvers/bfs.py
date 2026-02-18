@@ -1,3 +1,4 @@
+import numpy as np
 from solvers.base_solver import BaseSolver
 from collections import deque
 
@@ -13,7 +14,9 @@ class BFSSolver(BaseSolver):
             current_grid_bytes, path = queue.popleft()
             current_grid = np.frombuffer(current_grid_bytes, dtype=int).reshape(self.board.n, self.board.n)
 
-            if np.array_equal(current_grid, np.arange(1, self.board.n*self.board.n + 1).reshape((self.board.n, self.board.n))):
+            solved_grid = np.arange(1, self.board.n*self.board.n + 1).reshape((self.board.n, self.board.n))
+            solved_grid[self.board.n-1][self.board.n-1] = 0
+            if np.array_equal(current_grid, solved_grid):
                 return path
 
             empty_pos = tuple(np.argwhere(current_grid == 0)[0])

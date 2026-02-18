@@ -38,7 +38,9 @@ class Board:
         return False
 
     def is_solved(self):
-        return np.array_equal(self.grid, np.arange(1, self.n*self.n + 1).reshape((self.n, self.n)))
+        solved_grid = np.arange(1, self.n*self.n + 1).reshape((self.n, self.n))
+        solved_grid[self.n-1][self.n-1] = 0
+        return np.array_equal(self.grid, solved_grid)
 
     def __str__(self):
         return str(self.grid)
