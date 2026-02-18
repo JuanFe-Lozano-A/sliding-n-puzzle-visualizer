@@ -42,4 +42,4 @@ class AStarSolver(BaseSolver):
         return "Choosing the move that minimizes the cost (g) + heuristic (h)."
 
     def get_metrics(self):
-        return {"Heuristic": "Manhattan Distance"}
+        return {"Manhattan Distance": self.heuristic(self.board)}

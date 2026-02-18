@@ -30,8 +30,10 @@ def main():
     board_size_slider = Slider(screen_size + 220, 260, 150, 20, 2, 9, n)
     decision_log = DecisionLog(screen_size + 20, 300, 360, screen_size - 320)
 
+    metrics_display = Metrics(screen_size + 20, screen_size - 20, 360, 20)
+
     def new_game(size):
-        nonlocal board, shuffler, renderer, screen, screen_size
+        nonlocal board, shuffler, renderer, screen, screen_size, metrics_display
         n = int(size)
         board = Board(n)
         shuffler = Shuffler(board)
@@ -39,6 +41,7 @@ def main():
         screen_size = n * 80
         screen = pygame.display.set_mode((screen_size + 400, screen_size))
         renderer = Renderer(screen, board)
+        metrics_display = Metrics(screen_size + 20, screen_size - 20, 360, 20)
 
     running = True
     while running:
@@ -63,8 +66,10 @@ def main():
 
                             renderer.highlight_piece(board.get_empty_pos())
                             board.move(move)
+                            metrics = solver.get_metrics()
+                            metrics_display.set_metrics(metrics)
                             renderer.move_animation(board.get_empty_pos(), (board.get_empty_pos()[0], board.get_empty_pos()[1]), duration=speed_slider.value)
-                            decision_log.add_message(f"Move: {move} - {solver.get_decision_basis()}")
+                            decision_log.add_message(f"Move: {move} - {solver.get_decision_basis()} Metrics: {metrics}")
                     state_manager.set_state(GameState.PLAYING)
 
                 if bfs_button.is_clicked(pos):
@@ -83,8 +88,10 @@ def main():
 
                             renderer.highlight_piece(board.get_empty_pos())
                             board.move(move)
+                            metrics = solver.get_metrics()
+                            metrics_display.set_metrics(metrics)
                             renderer.move_animation(board.get_empty_pos(), (board.get_empty_pos()[0], board.get_empty_pos()[1]), duration=speed_slider.value)
-                            decision_log.add_message(f"Move: {move} - {solver.get_decision_basis()}")
+                            decision_log.add_message(f"Move: {move} - {solver.get_decision_basis()} Metrics: {metrics}")
                     state_manager.set_state(GameState.PLAYING)
 
                 if shuffle_button.is_clicked(pos):
@@ -130,6 +137,7 @@ def main():
         speed_slider.draw(screen)
         board_size_slider.draw(screen)
         decision_log.draw(screen)
+        metrics_display.draw(screen)
         pygame.display.flip()
 
     pygame.quit()
