@@ -26,8 +26,19 @@ def main():
     solve_button = Button(screen_size + 50, 50, 150, 50, "Solve (A*)")
     bfs_button = Button(screen_size + 50, 120, 150, 50, "Solve (BFS)")
     shuffle_button = Button(screen_size + 50, 190, 150, 50, "Shuffle")
-    speed_slider = Slider(screen_size + 50, 260, 150, 20, 0.1, 2, 1)
+    pause_button = Button(screen_size + 220, 190, 150, 50, "Pause")
+    board_size_slider = Slider(screen_size + 220, 260, 150, 20, 2, 9, n)
     decision_log = DecisionLog(screen_size + 20, 300, 360, screen_size - 320)
+
+    def new_game(size):
+        nonlocal board, shuffler, renderer, screen, screen_size
+        n = int(size)
+        board = Board(n)
+        shuffler = Shuffler(board)
+        shuffler.shuffle()
+        screen_size = n * 80
+        screen = pygame.display.set_mode((screen_size + 400, screen_size))
+        renderer = Renderer(screen, board)
 
     running = True
     while running:
@@ -42,6 +53,14 @@ def main():
                     solution = solver.solve()
                     if solution:
                         for move in solution:
+                            if state_manager.get_state() == GameState.PAUSED:
+                                while state_manager.get_state() == GameState.PAUSED:
+                                    pygame.time.wait(100)
+                                    for ev in pygame.event.get():
+                                        if ev.type == pygame.MOUSEBUTTONDOWN:
+                                            if pause_button.is_clicked(pygame.mouse.get_pos()):
+                                                state_manager.set_state(GameState.SOLVING)
+
                             renderer.highlight_piece(board.get_empty_pos())
                             board.move(move)
                             renderer.move_animation(board.get_empty_pos(), (board.get_empty_pos()[0], board.get_empty_pos()[1]), duration=speed_slider.value)
@@ -54,6 +73,14 @@ def main():
                     solution = solver.solve()
                     if solution:
                         for move in solution:
+                            if state_manager.get_state() == GameState.PAUSED:
+                                while state_manager.get_state() == GameState.PAUSED:
+                                    pygame.time.wait(100)
+                                    for ev in pygame.event.get():
+                                        if ev.type == pygame.MOUSEBUTTONDOWN:
+                                            if pause_button.is_clicked(pygame.mouse.get_pos()):
+                                                state_manager.set_state(GameState.SOLVING)
+
                             renderer.highlight_piece(board.get_empty_pos())
                             board.move(move)
                             renderer.move_animation(board.get_empty_pos(), (board.get_empty_pos()[0], board.get_empty_pos()[1]), duration=speed_slider.value)
@@ -62,6 +89,16 @@ def main():
 
                 if shuffle_button.is_clicked(pos):
                     shuffler.shuffle(100)
+                
+                if pause_button.is_clicked(pos):
+                    if state_manager.get_state() == GameState.PAUSED:
+                        state_manager.set_state(GameState.PLAYING)
+                    else:
+                        state_manager.set_state(GameState.PAUSED)
+
+                new_size = board_size_slider.get_value(pos)
+                if new_size is not None and int(new_size) != n:
+                    new_game(new_size)
 
                 speed_slider.get_value(pos)
 
@@ -89,7 +126,9 @@ def main():
         solve_button.draw(screen)
         bfs_button.draw(screen)
         shuffle_button.draw(screen)
+        pause_button.draw(screen)
         speed_slider.draw(screen)
+        board_size_slider.draw(screen)
         decision_log.draw(screen)
         pygame.display.flip()
 
